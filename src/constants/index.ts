@@ -1,0 +1,10 @@
+export const scaleCorrection = .001;
+export const maxDist = 1000;
+export const distToTargrtPoint = .6;
+export const distToCachePoint = 1.5;
+export const distToGateCachePoint = 1.5;
+export const distToGatePrePoint = 0.2;
+export const firstPointId = 600000;
+export const firstLaneId = 700000;
+export const firstRoadId = 800000;
+export const valuesRange = 100000;
