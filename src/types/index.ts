@@ -380,3 +380,32 @@ export type DxfIdsData = {
     dxfIdsList: Record<string, string[]>;
     dxfIdsBuff: dxfIdsBuff;
 };
+
+export type DXFDataType = {
+    quadraticSpline: any;
+    streamPallets: any;
+    targetPoints: any;
+    gatePallets: any;
+    palletLines: any;
+    chargeLines: any;
+    cubicSpline: any;
+    gateLines: any;
+    restLines: any;
+    charges: any;
+    pallets: any;
+    lines: any;
+    rests: any;
+    layer: any;
+
+    targetChargePoints: any;
+    turningChargePoints: any;
+
+    targetRestPoints: any;
+    turningRestPoints: any;
+
+    targetPalletPoints: any;
+    turningPalletPoints: any;
+    cachePalletPoints: any;
+
+    origin: any
+};

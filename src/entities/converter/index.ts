@@ -21,8 +21,10 @@ class ConverterStor {
     permission: string = "0.1";
 
     diapasonPoints: { x: number, y: number }[] = [];
+    missingPoints: string[] = [];
 
     isFarPointsModalOpen: boolean = false;
+    isMissingPointsModalOpen: boolean = false;
 
     refTime: [number, number] = [0, 0];
 
@@ -59,8 +61,16 @@ class ConverterStor {
         this.isFarPointsModalOpen = val;
     }
 
+    setOpenMissingPointsModal = (val: boolean) => {
+        this.isMissingPointsModalOpen = val;
+    }
+
     setDiapasonPoints = (points: { x: number, y: number }[]) => {
         this.diapasonPoints = points;
+    }
+
+    setMissingPoints = (names: string[]) => {
+        this.missingPoints = names;
     }
 
     setInaccuracy = (val: string) => {
@@ -199,12 +209,14 @@ class ConverterStor {
                     const data = JSON.parse(JSON.stringify(evt.data));
 
                     data.diapasonPoints.length && this.setOpenFarPointsModal(true);
+                    data.missingPoints.length && this.setOpenMissingPointsModal(true);
 
                     this.setMooeDoc(data.mooeDoc);
 
                     this.applyValues(this.values);
 
                     this.setDiapasonPoints(data.diapasonPoints);
+                    this.setMissingPoints(data.missingPoints);
 
                     this.setIsLoading(false);
 
@@ -229,11 +241,15 @@ class ConverterStor {
 
                 const data = dxf
                     ? getMooe(dxf, dxfIdsData, this.mooeDoc, this.permission, this.inaccuracy)
-                    : { mooeDoc: emptyMooe, diapasonPoints: [] };
+                    : { mooeDoc: emptyMooe, diapasonPoints: [], missingPoints: [] };
 
+                // set diapason points
                 data.diapasonPoints.length && this.setOpenFarPointsModal(true);
-
                 this.setDiapasonPoints(data.diapasonPoints);
+
+                // set missing points
+                data.missingPoints.length && this.setOpenMissingPointsModal(true);
+                this.setMissingPoints(data.missingPoints);
 
                 this.setMooeDoc(data.mooeDoc);
 

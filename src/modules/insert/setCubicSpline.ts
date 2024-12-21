@@ -26,7 +26,7 @@ export const setCubicSpline = (
     const newLanes: number[] = [];
     const newPoints: number[] = [];
 
-    const linePointsDiapason = spline?.map((obj: any) => {
+    const mooePointsDiapason = spline?.map((obj: any) => {
 
         const pointX1 = (obj.controlPoints[0].x + origin.x) * scaleCorrection;
         const pointY1 = (obj.controlPoints[0].y + origin.y) * scaleCorrection;
@@ -97,7 +97,22 @@ export const setCubicSpline = (
             return [objPos1, objPos2];
 
         }
-        else {
+
+    }).flat().filter((item: any) => item);
+
+    const dxfPointsDiapason = spline?.map((obj: any) => {
+
+        const pointX1 = (obj.controlPoints[0].x + origin.x) * scaleCorrection;
+        const pointY1 = (obj.controlPoints[0].y + origin.y) * scaleCorrection;
+        const pointZ1 = (obj.controlPoints[0].z + origin.z) * scaleCorrection;
+
+        const pointX2 = (obj.controlPoints[3].x + origin.x) * scaleCorrection;
+        const pointY2 = (obj.controlPoints[3].y + origin.y) * scaleCorrection;
+        const pointZ2 = (obj.controlPoints[3].z + origin.z) * scaleCorrection;
+
+        const ids = dxfIdsList[obj.handle.toLocaleLowerCase()];
+
+        if (!ids?.length) {
 
             const obj1 = mooeDoc.mLaneMarks.find(
                 (point: any) => isNearestPoints(
@@ -174,5 +189,5 @@ export const setCubicSpline = (
     dxfIdsBuff.laneIds = dxfIdsBuff.laneIds.filter(id => !newLanes.includes(id));
     dxfIdsBuff.pointIds = dxfIdsBuff.pointIds.filter(id => !newPoints.includes(id));
 
-    return linePointsDiapason;
+    return [...mooePointsDiapason, ...dxfPointsDiapason];
 }

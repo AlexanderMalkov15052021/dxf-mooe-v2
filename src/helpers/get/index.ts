@@ -1,6 +1,6 @@
-import { firstLaneId, firstPointId, firstRoadId, valuesRange } from "@/constants";
-import { getStrFromHex } from "../math";
-import { dxfIdsBuff, DxfIdsData } from "@/types";
+import { firstLaneId, firstPointId, firstRoadId, maxDist, scaleCorrection, valuesRange } from "@/constants";
+import { getAtan2, getDistPointToline, getStrFromHex } from "../math";
+import { Coords, Coords2D, dxfIdsBuff, DxfIdsData } from "@/types";
 
 export const getDirRoad = (str: string) => {
 
@@ -110,7 +110,7 @@ export const getDxfIdsData = (docStr: string): DxfIdsData => {
             accum.objIds.laneIds.push(Number(rest[1]));
             accum.objIds.pointIds.push(Number(rest[2]), Number(rest[3]));
 
-            
+
         }
 
         if (first === "point") {
@@ -152,4 +152,92 @@ export const getDxfIdsData = (docStr: string): DxfIdsData => {
     const result: DxfIdsData = { dxfIdsList: dxfIds.dxfIdsList, dxfIdsBuff };
 
     return result;
+}
+
+export const getDistToRoad = (road: any, point: any, origin: Coords) => {
+
+    switch (road.layer) {
+        case "Straight roads":
+            return getDistPointToline(
+                (point.position.x + origin.x) * scaleCorrection,
+                (point.position.y + origin.y) * scaleCorrection,
+                (road.vertices[0].x + origin.x) * scaleCorrection,
+                (road.vertices[0].y + origin.y) * scaleCorrection,
+                (road.vertices[1].x + origin.x) * scaleCorrection,
+                (road.vertices[1].y + origin.y) * scaleCorrection
+            );
+
+        case "Quadratic spline roads":
+            return getDistPointToline(
+                (point.position.x + origin.x) * scaleCorrection,
+                (point.position.y + origin.y) * scaleCorrection,
+                (road.controlPoints[0].x + origin.x) * scaleCorrection,
+                (road.controlPoints[0].y + origin.y) * scaleCorrection,
+                (road.controlPoints[2].x + origin.x) * scaleCorrection,
+                (road.controlPoints[2].y + origin.y) * scaleCorrection
+            );
+
+        case "Cubic spline roads":
+            return getDistPointToline(
+                (point.position.x + origin.x) * scaleCorrection,
+                (point.position.y + origin.y) * scaleCorrection,
+                (road.controlPoints[0].x + origin.x) * scaleCorrection,
+                (road.controlPoints[0].y + origin.y) * scaleCorrection,
+                (road.controlPoints[3].x + origin.x) * scaleCorrection,
+                (road.controlPoints[3].y + origin.y) * scaleCorrection
+            );
+
+        default:
+            return maxDist;
+    }
+}
+
+
+export const getRoadAngle = (data: any) => {
+
+    switch (data.road.layer) {
+        case "Straight roads":
+            return getAtan2(
+                data.road.vertices[0].x,
+                data.road.vertices[0].y,
+                data.road.vertices[1].x,
+                data.road.vertices[1].y
+            )
+
+        case "Quadratic spline roads":
+            return getAtan2(
+                data.road.controlPoints[0].x,
+                data.road.controlPoints[0].y,
+                data.road.controlPoints[2].x,
+                data.road.controlPoints[2].y
+            )
+
+        case "Cubic spline roads":
+            return getAtan2(
+                data.road.controlPoints[0].x,
+                data.road.controlPoints[0].y,
+                data.road.controlPoints[3].x,
+                data.road.controlPoints[3].y
+            )
+
+        default:
+            return maxDist;
+    }
+}
+
+export const getRoadEndCoord = (data: any): Coords2D => {
+
+    switch (data.road.layer) {
+        case "Straight roads":
+            return data.road.vertices[1];
+
+        case "Quadratic spline roads":
+            return data.road.controlPoints[2];
+
+        case "Cubic spline roads":
+            return data.road.controlPoints[3];
+
+        default:
+            return { x: 0, y: 0 };
+    }
 }

@@ -10,9 +10,9 @@ const UploadForm = observer(() => {
 
     const {
         store: {
-            isLoading, refFileName, isFarPointsModalOpen, diapasonPoints,
+            isLoading, refFileName, isFarPointsModalOpen, isMissingPointsModalOpen, diapasonPoints, missingPoints,
             setIsMessageShow, setIsLoading, setLoadingTime, setRefFileName, setMooeDoc,
-            setOpenFarPointsModal, setDXFStr, setRefTime
+            setOpenFarPointsModal, setOpenMissingPointsModal, setDXFStr, setRefTime
         },
     } = ConverterStor;
 
@@ -62,6 +62,14 @@ const UploadForm = observer(() => {
         setOpenFarPointsModal(false);
     }
 
+    const missingPointsModalOkHandler = () => {
+        setOpenMissingPointsModal(false);
+    }
+
+    const missingPointsModalCancelHandler = () => {
+        setOpenMissingPointsModal(false);
+    }
+
     return <>
         <form onClick={isLoading ? evt => evt.preventDefault() : restFiles}>
             <label htmlFor="file-upload" className={isLoading ? "disabledUpload custom-file-upload" : "custom-file-upload"}>
@@ -74,6 +82,18 @@ const UploadForm = observer(() => {
                 <div key={index}>
                     <span>x: </span><span>{poin.x}</span>
                     <span>y: </span><span>{poin.y}</span>
+                </div>
+            )}
+        </Modal>
+        <Modal
+            title="Отсутствующие точки"
+            open={isMissingPointsModalOpen}
+            onOk={missingPointsModalOkHandler}
+            onCancel={missingPointsModalCancelHandler}
+        >
+            {missingPoints.map((name: string, index: number) =>
+                <div key={index}>
+                    <span>{name}</span>
                 </div>
             )}
         </Modal>

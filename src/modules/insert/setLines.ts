@@ -24,7 +24,7 @@ export const setLines = (mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>,
     const newLanes: number[] = [];
     const newPoints: number[] = [];
 
-    const linePointsDiapason = lines?.map((obj: any) => {
+    const mooePointsDiapason = lines?.map((obj: any) => {
 
         const isPickUpLane = obj.layer.includes("Pallet roads") || obj.layer.includes("Charge roads")
             || obj.layer.includes("Rest roads") || obj.layer.includes("Flow roads");
@@ -87,7 +87,25 @@ export const setLines = (mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>,
 
             return [objPos1, objPos2];
         }
-        else {
+
+    }).flat().filter((item: any) => item);
+
+    const dxfPointsDiapason = lines?.map((obj: any) => {
+
+        const isPickUpLane = obj.layer.includes("Pallet roads") || obj.layer.includes("Charge roads")
+            || obj.layer.includes("Rest roads") || obj.layer.includes("Flow roads");
+
+        const pointX1 = (obj.vertices[0].x + origin.x) * scaleCorrection;
+        const pointY1 = (obj.vertices[0].y + origin.y) * scaleCorrection;
+        const pointZ1 = (obj.vertices[0].z + origin.z) * scaleCorrection;
+
+        const pointX2 = (obj.vertices[1].x + origin.x) * scaleCorrection;
+        const pointY2 = (obj.vertices[1].y + origin.y) * scaleCorrection;
+        const pointZ2 = (obj.vertices[1].z + origin.z) * scaleCorrection;
+
+        const ids = dxfIdsList[obj.handle];
+
+        if (!ids?.length) {
 
             const obj1 = mooeDoc.mLaneMarks.find(
                 (point: any) => isNearestPoints(
@@ -156,5 +174,5 @@ export const setLines = (mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>,
     dxfIdsBuff.laneIds = dxfIdsBuff.laneIds.filter(id => !newLanes.includes(id));
     dxfIdsBuff.pointIds = dxfIdsBuff.pointIds.filter(id => !newPoints.includes(id));
 
-    return linePointsDiapason;
+    return [...mooePointsDiapason, ...dxfPointsDiapason];
 }

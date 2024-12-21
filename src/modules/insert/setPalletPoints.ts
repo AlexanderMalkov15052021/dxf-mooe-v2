@@ -1,11 +1,12 @@
-import { distToTargrtPoint, maxDist, scaleCorrection } from "@/constants";
+import { distToCachePoint, distToTargrtPoint, maxDist, scaleCorrection } from "@/constants";
+import { cachePoint } from "@/helpers/elements/cachePoint";
 import { targetPoint } from "@/helpers/elements/targetPoint";
 import { windingPoint } from "@/helpers/elements/windingPoint";
 import { getDistToRoad, getRoadAngle, getRoadEndCoord } from "@/helpers/get";
 import { getAtan2, getDistPointToline, getPerpendicularBase } from "@/helpers/math";
 import { Coords, DXFDataType, MooeDoc } from "@/types";
 
-export const setRestPoints = (
+export const setPalletPoints = (
     mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>, DXFData: DXFDataType, lines: any
 ) => {
 
@@ -13,12 +14,12 @@ export const setRestPoints = (
 
     const origin: Coords = DXFData.origin;
 
-    DXFData.rests?.map((obj: any) => {
+    DXFData.pallets?.map((obj: any) => {
 
         const pointX = (obj.position.x + origin.x) * scaleCorrection;
         const pointY = (obj.position.y + origin.y) * scaleCorrection;
 
-        const lineData = DXFData.restLines.reduce((accum: { dist: number, line: any }, line: any) => {
+        const lineData = DXFData.palletLines.reduce((accum: { dist: number, line: any }, line: any) => {
 
             const dist = getDistPointToline(
                 pointX,
@@ -79,24 +80,25 @@ export const setRestPoints = (
             obj.text.replace(" ", "")
         ));
 
-        const targetRestPoints = DXFData.targetRestPoints.find((target: any) => target.text.includes(obj.text));
-        const turningRestPoints = DXFData.turningRestPoints.find((turning: any) => turning.text.includes(obj.text));
+        const targetPalletPoints = DXFData.targetPalletPoints.find((target: any) => target.text.includes(obj.text));
+        const turningPalletPoints = DXFData.turningPalletPoints.find((turning: any) => turning.text.includes(obj.text));
+        const cachePalletPoints = DXFData.cachePalletPoints.find((cache: any) => cache.text.includes(obj.text));
 
         // adding target point
-        if (targetRestPoints) {
-            const targetPointId = dxfIdsList[targetRestPoints?.handle ?? 0];
+        if (targetPalletPoints) {
+            const targetPointId = dxfIdsList[targetPalletPoints?.handle ?? 0];
 
             mooeDoc.mLaneMarks.push(targetPoint(
                 targetPointId?.length ? Number(targetPointId[0]) : 0,
                 targetPointId?.length
-                    ? targetRestPoints.position.x * scaleCorrection
+                    ? targetPalletPoints.position.x * scaleCorrection
                     : pointX + (distToTargrtPoint * Math.cos(angle)),
                 targetPointId?.length
-                    ? targetRestPoints.position.y * scaleCorrection
+                    ? targetPalletPoints.position.y * scaleCorrection
                     : pointY + (distToTargrtPoint * Math.sin(angle)),
                 angle,
                 targetPointId?.length
-                    ? targetRestPoints.text.replace(" ", "")
+                    ? targetPalletPoints.text.replace(" ", "")
                     : `${obj.text.replace(" ", "")}检`
             ));
         }
@@ -104,11 +106,35 @@ export const setRestPoints = (
             missingPoints.push(`target point - ${obj.text.replace(" ", "")}`);
         }
 
+        // adding cache point
+        if (cachePalletPoints) {
+            const cachePointId = dxfIdsList[cachePalletPoints?.handle ?? 0];
+
+            mooeDoc.mLaneMarks.push(cachePoint(
+                cachePointId?.length ? Number(cachePointId[0]) : 0,
+                cachePointId?.length
+                    ? cachePalletPoints.position.x * scaleCorrection
+                    : pointX + (distToCachePoint * Math.cos(angle)),
+                cachePointId?.length
+                    ? cachePalletPoints.position.y * scaleCorrection
+                    : pointY + (distToCachePoint * Math.sin(angle)),
+                angle,
+                cachePointId?.length
+                    ? cachePalletPoints.text.replace(" ", "")
+                    : `${obj.text.replace(" ", "")}识别`
+            ));
+        }
+        else {
+            missingPoints.push(`cache point - ${obj.text.replace(" ", "")}`);
+        }
+
         // adding turning point
-        if (turningRestPoints) {
+        if (turningPalletPoints) {
+            const turningPointId = dxfIdsList[turningPalletPoints?.handle ?? 0];
+
             const turningLineData = lines.reduce((accum: { dist: number, road: any }, road: any) => {
 
-                const dist = getDistToRoad(road, turningRestPoints, origin);
+                const dist = getDistToRoad(road, turningPalletPoints, origin);
 
                 if (dist < accum.dist) {
                     accum.dist = dist;
@@ -117,9 +143,7 @@ export const setRestPoints = (
 
                 return accum;
 
-            }, { dist: maxDist, road: null });
-
-            const turningPointId = dxfIdsList[turningRestPoints?.handle ?? 0];
+            }, { dist: maxDist, line: null });
 
             const roadEndCoord = getRoadEndCoord(turningLineData);
 
@@ -128,14 +152,14 @@ export const setRestPoints = (
             mooeDoc.mLaneMarks.push(targetPoint(
                 turningPointId?.length ? Number(turningPointId[0]) : 0,
                 turningPointId?.length
-                    ? turningRestPoints.position.x * scaleCorrection
+                    ? turningPalletPoints.position.x * scaleCorrection
                     : roadEndCoord.x * scaleCorrection + (distToTargrtPoint * Math.cos(turningAngle)),
                 turningPointId?.length
-                    ? turningRestPoints.position.y * scaleCorrection
+                    ? turningPalletPoints.position.y * scaleCorrection
                     : roadEndCoord.y * scaleCorrection + (distToTargrtPoint * Math.sin(turningAngle)),
                 turningAngle,
                 turningPointId?.length
-                    ? turningRestPoints.text.replace(" ", "")
+                    ? turningPalletPoints.text.replace(" ", "")
                     : `${obj.text.replace(" ", "")}前置点`
             ));
         }
@@ -146,5 +170,4 @@ export const setRestPoints = (
     });
 
     return missingPoints;
-
 }

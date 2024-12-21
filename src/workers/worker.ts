@@ -17,11 +17,12 @@ const sendDXF = (evt: any) => {
 
     const data = dxf
         ? getMooe(dxf, dxfIdsData, evt.data.mooeDoc, evt.data.permission, evt.data.inaccuracy)
-        : { mooeDoc: emptyMooe, diapasonPoints: [] };
+        : { mooeDoc: emptyMooe, diapasonPoints: [], missingPoints: [] };
 
     ctx.postMessage({
         mooeDoc: JSON.parse(JSON.stringify(data.mooeDoc)),
-        diapasonPoints: JSON.parse(JSON.stringify(data.diapasonPoints))
+        diapasonPoints: JSON.parse(JSON.stringify(data.diapasonPoints)),
+        missingPoints: JSON.parse(JSON.stringify(data.missingPoints))
     });
 }
 

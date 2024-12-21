@@ -26,7 +26,7 @@ export const setQuadraticSpline = (
     const newLanes: number[] = [];
     const newPoints: number[] = [];
 
-    const linePointsDiapason = spline?.map((obj: any) => {
+    const mooePointsDiapason = spline?.map((obj: any) => {
 
         const pointX1 = (obj.controlPoints[0].x + origin.x) * scaleCorrection;
         const pointY1 = (obj.controlPoints[0].y + origin.y) * scaleCorrection;
@@ -164,9 +164,92 @@ export const setQuadraticSpline = (
 
     }).flat().filter((item: any) => item);
 
+    const dxfPointsDiapason = spline?.map((obj: any) => {
+
+        const pointX1 = (obj.controlPoints[0].x + origin.x) * scaleCorrection;
+        const pointY1 = (obj.controlPoints[0].y + origin.y) * scaleCorrection;
+        const pointZ1 = (obj.controlPoints[0].z + origin.z) * scaleCorrection;
+
+        const pointX2 = (obj.controlPoints[2].x + origin.x) * scaleCorrection;
+        const pointY2 = (obj.controlPoints[2].y + origin.y) * scaleCorrection;
+        const pointZ2 = (obj.controlPoints[2].z + origin.z) * scaleCorrection;
+
+        const ids = dxfIdsList[obj.handle.toLocaleLowerCase()];
+
+        if (!ids?.length) {
+
+            const obj1 = mooeDoc.mLaneMarks.find(
+                (point: any) => isNearestPoints(
+                    pointX1,
+                    pointY1,
+                    point.mLaneMarkXYZW.x,
+                    point.mLaneMarkXYZW.y,
+                    permission
+                )
+            );
+
+            const obj2 = mooeDoc.mLaneMarks.find(
+                (point: any) => isNearestPoints(
+                    pointX2,
+                    pointY2,
+                    point.mLaneMarkXYZW.x,
+                    point.mLaneMarkXYZW.y,
+                    permission
+                )
+            );
+
+            const startId = getTargetId(mooeDoc, dxfIdsBuff, pointX1, pointY1, newPoints, obj1);
+            const endId = getTargetId(mooeDoc, dxfIdsBuff, pointX2, pointY2, newPoints, obj2);
+
+
+
+            const startPoint = obj1
+                ? { x: obj1?.mLaneMarkXYZW.x, y: obj1?.mLaneMarkXYZW.y, z: obj1?.mLaneMarkXYZW.z }
+                : { x: pointX1, y: pointY1, z: pointZ1 };
+
+            const endPoint = obj2
+                ? { x: obj2?.mLaneMarkXYZW.x, y: obj2?.mLaneMarkXYZW.y, z: obj2?.mLaneMarkXYZW.z }
+                : { x: pointX2, y: pointY2, z: pointZ2 };
+
+            const controlPoint = {
+                x: (obj.controlPoints[1].x + origin.x) * scaleCorrection,
+                y: (obj.controlPoints[1].y + origin.y) * scaleCorrection,
+                z: (obj.controlPoints[1].z + origin.z) * scaleCorrection
+            }
+
+
+            const roadLength = quadraticBezierLength(startPoint, endPoint, controlPoint);
+
+
+            mooeDoc.mRoads.push(quadraticSpline(
+                startId,
+                endId,
+                startPoint,
+                endPoint,
+                dxfIdsBuff.laneIds[newLanes.length],
+                Math.PI / 2,
+                1,
+                dxfIdsBuff.roadIds[newRoads.length],
+                controlPoint,
+                roadLength
+            ));
+
+            !ids?.length && newRoads.push(dxfIdsBuff.roadIds[newRoads.length]) && newLanes.push(dxfIdsBuff.laneIds[newLanes.length]);
+
+            const isPermission1 = obj1 && getDistTwoPoints(obj1.mLaneMarkXYZW.x, obj1.mLaneMarkXYZW.y, pointX1, pointY1) > inaccuracy;
+            const isPermission2 = obj2 && getDistTwoPoints(obj2.mLaneMarkXYZW.x, obj2.mLaneMarkXYZW.y, pointX2, pointY2) > inaccuracy;
+
+            const objPos1 = isPermission1 && { x: obj1.mLaneMarkXYZW.x, y: obj1.mLaneMarkXYZW.y, z: obj1.mLaneMarkXYZW.z };
+            const objPos2 = isPermission2 && { x: obj2.mLaneMarkXYZW.x, y: obj2.mLaneMarkXYZW.y, z: obj2.mLaneMarkXYZW.z };
+
+            return [objPos1, objPos2];
+        }
+
+    }).flat().filter((item: any) => item);
+
     dxfIdsBuff.roadIds = dxfIdsBuff.roadIds.filter(id => !newRoads.includes(id));
     dxfIdsBuff.laneIds = dxfIdsBuff.laneIds.filter(id => !newLanes.includes(id));
     dxfIdsBuff.pointIds = dxfIdsBuff.pointIds.filter(id => !newPoints.includes(id));
 
-    return linePointsDiapason;
+    return [...mooePointsDiapason, ...dxfPointsDiapason];
 }

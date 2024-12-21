@@ -1,19 +1,24 @@
 import { distToTargrtPoint, maxDist, scaleCorrection } from "@/constants";
-// import { prePoint } from "@/helpers/elements/prePoint";
 import { targetPoint } from "@/helpers/elements/targetPoint";
 import { windingPoint } from "@/helpers/elements/windingPoint";
+import { getDistToRoad, getRoadAngle, getRoadEndCoord } from "@/helpers/get";
 import { getAtan2, getDistPointToline, getPerpendicularBase } from "@/helpers/math";
-import { Coords, MooeDoc } from "@/types";
+import { Coords, DXFDataType, MooeDoc } from "@/types";
 
 export const setChargePoints = (
-    mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>, chargePoints: any, chargeLines: any, lines: any, origin: Coords
+    mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>, DXFData: DXFDataType, lines: any
 ) => {
-    chargePoints?.map((obj: any) => {
+
+    const missingPoints: string[] = [];
+
+    const origin: Coords = DXFData.origin;
+
+    DXFData.charges?.map((obj: any) => {
 
         const pointX = (obj.position.x + origin.x) * scaleCorrection;
         const pointY = (obj.position.y + origin.y) * scaleCorrection;
 
-        const lineData = chargeLines.reduce((accum: { dist: number, line: any }, line: any) => {
+        const lineData = DXFData.chargeLines.reduce((accum: { dist: number, line: any }, line: any) => {
 
             const dist = getDistPointToline(
                 pointX,
@@ -45,33 +50,6 @@ export const setChargePoints = (
             lineData.line.vertices[1].y
         );
 
-        const targetLineData = lines.reduce((accum: { dist: number, line: any }, line: any) => {
-
-            const dist = getDistPointToline(
-                lineData.line.vertices[1].x * scaleCorrection - ((distToTargrtPoint / 2) * Math.cos(angle + Math.PI / 2)),
-                lineData.line.vertices[1].y * scaleCorrection - ((distToTargrtPoint / 2) * Math.sin(angle + Math.PI / 2)),
-                (line.vertices[0].x + origin.x) * scaleCorrection,
-                (line.vertices[0].y + origin.y) * scaleCorrection,
-                (line.vertices[1].x + origin.x) * scaleCorrection,
-                (line.vertices[1].y + origin.y) * scaleCorrection
-            );
-
-            if (dist < accum.dist) {
-                accum.dist = dist;
-                accum.line = line;
-            }
-
-            return accum;
-
-        }, { dist: maxDist, line: null });
-
-        const targetAngle = getAtan2(
-            targetLineData.line.vertices[0].x,
-            targetLineData.line.vertices[0].y,
-            targetLineData.line.vertices[1].x,
-            targetLineData.line.vertices[1].y
-        );
-
         const distToRoad = getDistPointToline(
             pointX,
             pointY,
@@ -81,6 +59,7 @@ export const setChargePoints = (
             lineData.line.vertices[1].y * scaleCorrection
         );
 
+        // to align the base point to the center
         const perpendicularBase = getPerpendicularBase(lineData.line.vertices[0], lineData.line.vertices[1], pointX, pointY);
 
         const angleToBasePoint = getAtan2(
@@ -90,31 +69,86 @@ export const setChargePoints = (
             perpendicularBase.y
         );
 
-        const ids = dxfIdsList[obj.handle];
+        const windingPointId = dxfIdsList[obj.handle];
 
         mooeDoc.mLaneMarks.push(windingPoint(
-            ids ? Number(ids[0]) : 0,
+            windingPointId?.length ? Number(windingPointId[0]) : 0,
             angleToBasePoint ? pointX + (distToRoad * Math.cos(angleToBasePoint)) : pointX,
             angleToBasePoint ? pointY + (distToRoad * Math.sin(angleToBasePoint)) : pointY,
             angle,
             obj.text.replace(" ", "")
         ));
 
-        mooeDoc.mLaneMarks.push(targetPoint(
-            ids ? Number(ids[1]) : 0,
-            pointX + (distToTargrtPoint * Math.cos(angle)),
-            pointY + (distToTargrtPoint * Math.sin(angle)),
-            angle,
-            `${obj.text.replace(" ", "")}检`
-        ));
 
-        mooeDoc.mLaneMarks.push(targetPoint(
-            ids ? Number(ids[2]) : 0,
-            lineData.line.vertices[1].x * scaleCorrection + (distToTargrtPoint * Math.cos(targetAngle)),
-            lineData.line.vertices[1].y * scaleCorrection + (distToTargrtPoint * Math.sin(targetAngle)),
-            targetAngle,
-            `${obj.text.replace(" ", "")}前置点`
-        ));
+        const targetChargePoints = DXFData.targetChargePoints.find((target: any) => target.text.includes(obj.text));
+        const turningChargePoints = DXFData.turningChargePoints.find((turning: any) => turning.text.includes(obj.text));
+
+        // adding target point
+        if (targetChargePoints) {
+            const targetPointId = dxfIdsList[targetChargePoints?.handle ?? 0];
+
+            mooeDoc.mLaneMarks.push(targetPoint(
+                targetPointId?.length ? Number(targetPointId[0]) : 0,
+                targetPointId?.length
+                    ? targetChargePoints.position.x * scaleCorrection
+                    : pointX + (distToTargrtPoint * Math.cos(angle)),
+                targetPointId?.length
+                    ? targetChargePoints.position.y * scaleCorrection
+                    : pointY + (distToTargrtPoint * Math.sin(angle)),
+                angle,
+                targetPointId?.length
+                    ? targetChargePoints.text.replace(" ", "")
+                    : `${obj.text.replace(" ", "")}检`
+            ));
+
+        }
+        else {
+            missingPoints.push(`target point - ${obj.text.replace(" ", "")}`);
+        }
+
+        // adding turning point
+        if (turningChargePoints) {
+            const turningLineData = lines.reduce((accum: { dist: number, road: any }, road: any) => {
+
+                const dist = getDistToRoad(road, turningChargePoints, origin);
+
+                if (dist < accum.dist) {
+                    accum.dist = dist;
+                    accum.road = road;
+                }
+
+                return accum;
+
+            }, { dist: maxDist, road: null });
+
+
+            const turningPointId = dxfIdsList[turningChargePoints?.handle ?? 0];
+
+            const roadEndCoord = getRoadEndCoord(turningLineData);
+
+            const turningAngle = getRoadAngle(turningLineData);
+
+            mooeDoc.mLaneMarks.push(targetPoint(
+                turningPointId?.length ? Number(turningPointId[0]) : 0,
+                turningPointId?.length
+                    ? turningChargePoints.position.x * scaleCorrection
+                    : roadEndCoord.x * scaleCorrection + (distToTargrtPoint * Math.cos(turningAngle)),
+                turningPointId?.length
+                    ? turningChargePoints.position.y * scaleCorrection
+                    : roadEndCoord.y * scaleCorrection + (distToTargrtPoint * Math.sin(turningAngle)),
+                turningAngle,
+                turningPointId?.length
+                    ? turningChargePoints.text.replace(" ", "")
+                    : `${obj.text.replace(" ", "")}前置点`
+            ));
+
+        }
+        else {
+            missingPoints.push(`turning point - ${obj.text.replace(" ", "")}`);
+        }
 
     });
+
+    return missingPoints;
+
 }
