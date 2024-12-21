@@ -23,7 +23,14 @@ export default function Home() {
 
         <Image className={"mainImg"} preview={false} src="img/svg/ak.svg"></Image>
 
-        <Title className={"h1"}><span className={"titleBlock"}><span>Конвертер</span><span>.dxf</span>/<span>.mooe</span></span></Title>
+        <Title className={"h1"}>
+          <span className={"titleBlock"}>
+            <span>Конвертер</span>
+            <span>.dxf</span>/<span>.mooe</span>
+          </span>
+        </Title>
+
+        <div>V2.0</div>
 
         <main className={"main-block"}>
 

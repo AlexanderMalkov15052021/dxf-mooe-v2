@@ -35,8 +35,8 @@ input[type="file"] {
 }
 
 .custom-file-upload:hover {
-  border-color: #00b96b;
-  color: #00b96b;
+  border-color: #00a98b;
+  color: #00a98b;
 }
 
 .h1 {
@@ -61,7 +61,7 @@ p {
 }
 
 .converting {
-  color: #00b96b;
+  color: #00a98b;
 }
 
 .titleBlock {
@@ -79,7 +79,7 @@ p {
 
 .counter {
   font-size: 30px;
-  color: #00b96b;
+  color: #00a98b;
   margin-bottom: 20px;
 }
 
