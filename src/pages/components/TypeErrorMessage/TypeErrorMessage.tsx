@@ -4,10 +4,12 @@ import { observer } from "mobx-react-lite";
 const TypeErrorMessage = observer(() => {
 
     const {
-        store: { isMessageShow },
+        store: { isDXFMessageShow, isMOOEMessageShow },
     } = ConverterStor;
 
-    return isMessageShow && <p className={"message"}>Необходим файл с расширением .dxf</p>
+    return (isDXFMessageShow || isMOOEMessageShow) && <p className={"message"}>
+        {`Необходим файл с расширением ${isDXFMessageShow ? ".dxf" : ".mooe"}`}
+    </p>
 });
 
 export default TypeErrorMessage;
