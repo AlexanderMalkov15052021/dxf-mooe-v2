@@ -9,13 +9,16 @@ import { getDxfIdsData } from "@/helpers/get";
 
 class ConverterStor {
     isLoading: boolean = false;
-    refFileName: string | null = null;
+    dxfFileName: string | null = null;
+    mooeFileName: string | null = null;
     loadingTime: number[] = [0, 0];
-    isMessageShow: boolean = false;
+    isDXFMessageShow: boolean = false;
+    isMOOEMessageShow: boolean = false;
     href: string = "";
     mooeDoc: MooeDoc = emptyMooe;
 
     dxfStr: string = "";
+    mooeStr: string = "";
 
     inaccuracy: string = "0.001";
     permission: string = "0.1";
@@ -55,6 +58,11 @@ class ConverterStor {
     setDXFStr = (val: string) => {
         this.dxfStr = val;
         this.applyDXFData();
+    }
+
+    setMOOEStr = (val: string) => {
+        this.mooeStr = val;
+        this.applyScan(val);
     }
 
     setOpenFarPointsModal = (val: boolean) => {
@@ -155,6 +163,8 @@ class ConverterStor {
 
         this.isLoading = false;
 
+        this.applyScan();
+
     }
 
 
@@ -164,16 +174,40 @@ class ConverterStor {
 
         this.values = values;
 
-        console.log(values);
-
         this.isLoading = true;
 
         setTimeout(() => this.applyValues(values));
 
     }
 
+    applyScan = (mooeStr?: string) => {
+        try {
+
+            if (this.mooeStr) {
+                const mooeJson = JSON.parse(this.mooeStr);
+
+                this.mooeDoc.mSceneMap.mGridMsg.data = mooeJson.mSceneMap.mGridMsg.data;
+            }
+
+            if (mooeStr) {
+                const mooeJson = JSON.parse(mooeStr);
+
+                this.mooeDoc.mSceneMap.mGridMsg.data = mooeJson.mSceneMap.mGridMsg.data;
+
+                this.setHref(this.mooeDoc);
+            }
+
+            this.setIsLoading(false);
+
+        } catch (err: any) {
+            return console.error(err.stack);
+        }
+    }
+
     applyDXFData = () => {
         this.setMooeDoc(emptyMooe);
+
+        this.applyScan();
 
         try {
 
@@ -268,8 +302,25 @@ class ConverterStor {
     }
 
     setLoadingTime = (val: number[]) => this.loadingTime = val;
-    setIsMessageShow = (val: boolean) => this.isMessageShow = val;
-    setRefFileName = (val: string | null) => this.refFileName = val;
+
+    setIsMessageShow = (val: boolean, ext?: string) => {
+
+        switch (ext) {
+            case "dxf":
+                this.isDXFMessageShow = val;
+                break;
+            case "mooe":
+                this.isMOOEMessageShow = val;
+                break;
+            default:
+                this.isDXFMessageShow = val;
+                break;
+        }
+
+    }
+
+    setDXFFileName = (val: string | null) => this.dxfFileName = val;
+    setMOOEFileName = (val: string | null) => this.mooeFileName = val;
     setIsLoading = (val: boolean) => this.isLoading = val;
 
     setHref = (doc: MooeDoc) => {
@@ -278,7 +329,7 @@ class ConverterStor {
         const file = new Blob([newDock as unknown as string], { type: 'application/mooe' });
         const url = URL.createObjectURL(file);
 
-        this.href = url;
+        this.href = doc.mLaneMarks.length ? url : "";
     }
 
     setMooeDoc = (doc: MooeDoc) => {

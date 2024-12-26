@@ -10,8 +10,8 @@ const UploadForm = observer(() => {
 
     const {
         store: {
-            isLoading, refFileName, isFarPointsModalOpen, isMissingPointsModalOpen, diapasonPoints, missingPoints,
-            setIsMessageShow, setIsLoading, setLoadingTime, setRefFileName, setMooeDoc,
+            isLoading, dxfFileName, isFarPointsModalOpen, isMissingPointsModalOpen, diapasonPoints, missingPoints,
+            setIsMessageShow, setIsLoading, setLoadingTime, setDXFFileName, setMooeDoc,
             setOpenFarPointsModal, setOpenMissingPointsModal, setDXFStr, setRefTime
         },
     } = ConverterStor;
@@ -21,7 +21,7 @@ const UploadForm = observer(() => {
         if (!evt.target.files) return;
 
         if (evt.target.files[0].name.split(".").at(-1) !== "dxf") {
-            setIsMessageShow(true);
+            setIsMessageShow(true, "dxf");
             return
         };
 
@@ -31,7 +31,7 @@ const UploadForm = observer(() => {
         const reader = new FileReader();
         reader.readAsText(file);
 
-        setRefFileName(file.name);
+        setDXFFileName(file.name);
 
         reader.onload = async () => {
 
@@ -46,9 +46,9 @@ const UploadForm = observer(() => {
     }
 
     const restFiles = (evt: FormEvent<HTMLFormElement>) => {
-        setIsMessageShow(false);
+        setIsMessageShow(false, "dxf");
         evt.currentTarget.reset();
-        setRefFileName(null);
+        setDXFFileName(null);
         setLoadingTime([0, 0]);
         setMooeDoc(emptyMooe);
         setRefTime([0, 0]);
@@ -73,7 +73,7 @@ const UploadForm = observer(() => {
     return <>
         <form onClick={isLoading ? evt => evt.preventDefault() : restFiles}>
             <label htmlFor="file-upload" className={isLoading ? "disabledUpload custom-file-upload" : "custom-file-upload"}>
-                {refFileName ? refFileName : "Выберите файл .dxf"}
+                {dxfFileName ? dxfFileName : "Выберите файл .dxf"}
             </label>
             <input id="file-upload" type="file" onChange={isLoading ? evt => evt.preventDefault() : readFile} />
         </form>
