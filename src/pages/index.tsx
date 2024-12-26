@@ -8,6 +8,7 @@ import TypeErrorMessage from "./components/TypeErrorMessage/TypeErrorMessage";
 import LoadingBlock from "./components/LoadingBlock/LoadingBlock";
 import DownloadBtn from "./components/DownloadBtn/DownloadBtn";
 import MapSettings from "./components/MapSettings/MapSettings";
+import UploadMOOE from "./components/UploadMOOE/UploadMOOE";
 
 export default function Home() {
 
@@ -44,6 +45,7 @@ export default function Home() {
 
           <DownloadBtn />
 
+          <UploadMOOE />
 
         </main>
       </div>
