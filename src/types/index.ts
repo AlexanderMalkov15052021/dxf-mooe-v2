@@ -407,5 +407,7 @@ export type DXFDataType = {
     turningPalletPoints: any;
     cachePalletPoints: any;
 
+    otheTargetPoints: any,
+
     origin: any
 };
