@@ -46,6 +46,8 @@ export const getMooe = (dxf: IDxf, dxfIdsData: DxfIdsData, mooeDoc: MooeDoc, per
 
     DXFData.targetPoints && setTargetPoints(mooeDoc, DXFData.targetPoints, lines, DXFData.origin);
 
+    DXFData.otheTargetPoints && setTargetPoints(mooeDoc, DXFData.otheTargetPoints, lines, DXFData.origin);
+
     DXFData.layer && setLayerSize(mooeDoc, DXFData.layer, DXFData.origin);
 
 
