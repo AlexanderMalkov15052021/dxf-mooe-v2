@@ -22,7 +22,7 @@ export const getMooe = (dxf: IDxf, dxfIdsData: DxfIdsData, mooeDoc: MooeDoc, per
 
     const lines = [...DXFData.lines, ...DXFData.chargeLines, ...DXFData.restLines, ...DXFData.palletLines, ...DXFData.gateLines];
 
-    const roads = [...DXFData.lines, ...DXFData.quadraticSpline, ...DXFData.cubicSpline];
+    // const roads = [...DXFData.lines, ...DXFData.quadraticSpline, ...DXFData.cubicSpline];
 
     const linePointsDiapason = setLines(
         mooeDoc, dxfIdsList, dxfIdsBuff, lines, numPerm, numInc, DXFData.origin
@@ -37,11 +37,16 @@ export const getMooe = (dxf: IDxf, dxfIdsData: DxfIdsData, mooeDoc: MooeDoc, per
     );
 
 
-    const missingPalletPoints = setPalletPoints(mooeDoc, dxfIdsList, DXFData, roads);
+    const missingPalletPoints = setPalletPoints(mooeDoc, dxfIdsList, DXFData);
 
-    const missingRestPoints = setRestPoints(mooeDoc, dxfIdsList, DXFData, roads);
+    const missingRestPoints = setRestPoints(mooeDoc, dxfIdsList, DXFData);
 
-    const missingChargePoints = setChargePoints(mooeDoc, dxfIdsList, DXFData, roads);
+    const missingChargePoints = setChargePoints(mooeDoc, dxfIdsList, DXFData);
+
+
+
+    DXFData.turningPalletPoints && setTargetPoints(mooeDoc, DXFData.turningPalletPoints, lines, DXFData.origin);
+
 
 
     DXFData.targetPoints && setTargetPoints(mooeDoc, DXFData.targetPoints, lines, DXFData.origin);

@@ -1,12 +1,12 @@
 import { distToTargrtPoint, maxDist, scaleCorrection } from "@/constants";
 import { targetPoint } from "@/helpers/elements/targetPoint";
 import { windingPoint } from "@/helpers/elements/windingPoint";
-import { getDistToRoad, getRoadAngle, getRoadEndCoord } from "@/helpers/get";
+// import { getDistToRoad, getRoadAngle, getRoadEndCoord } from "@/helpers/get";
 import { getAtan2, getDistPointToline, getPerpendicularBase } from "@/helpers/math";
 import { Coords, DXFDataType, MooeDoc } from "@/types";
 
 export const setRestPoints = (
-    mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>, DXFData: DXFDataType, lines: any
+    mooeDoc: MooeDoc, dxfIdsList: Record<string, string[]>, DXFData: DXFDataType
 ) => {
 
     const missingPoints: string[] = [];
@@ -106,38 +106,38 @@ export const setRestPoints = (
 
         // adding turning point
         if (turningRestPoints) {
-            const turningLineData = lines.reduce((accum: { dist: number, road: any }, road: any) => {
+            // const turningLineData = lines.reduce((accum: { dist: number, road: any }, road: any) => {
 
-                const dist = getDistToRoad(road, turningRestPoints, origin);
+            //     const dist = getDistToRoad(road, turningRestPoints, origin);
 
-                if (dist < accum.dist) {
-                    accum.dist = dist;
-                    accum.road = road;
-                }
+            //     if (dist < accum.dist) {
+            //         accum.dist = dist;
+            //         accum.road = road;
+            //     }
 
-                return accum;
+            //     return accum;
 
-            }, { dist: maxDist, road: null });
+            // }, { dist: maxDist, road: null });
 
-            const turningPointId = dxfIdsList[turningRestPoints?.handle ?? 0];
+            // const turningPointId = dxfIdsList[turningRestPoints?.handle ?? 0];
 
-            const roadEndCoord = getRoadEndCoord(turningLineData);
+            // const roadEndCoord = getRoadEndCoord(turningLineData);
 
-            const turningAngle = getRoadAngle(turningLineData);
+            // const turningAngle = getRoadAngle(turningLineData);
 
-            mooeDoc.mLaneMarks.push(targetPoint(
-                turningPointId?.length ? Number(turningPointId[0]) : 0,
-                turningPointId?.length
-                    ? turningRestPoints.position.x * scaleCorrection
-                    : roadEndCoord.x * scaleCorrection + (distToTargrtPoint * Math.cos(turningAngle)),
-                turningPointId?.length
-                    ? turningRestPoints.position.y * scaleCorrection
-                    : roadEndCoord.y * scaleCorrection + (distToTargrtPoint * Math.sin(turningAngle)),
-                turningAngle,
-                turningPointId?.length
-                    ? turningRestPoints.text.replace(" ", "")
-                    : `${obj.text.replace(" ", "")}前置点`
-            ));
+            // mooeDoc.mLaneMarks.push(targetPoint(
+            //     turningPointId?.length ? Number(turningPointId[0]) : 0,
+            //     turningPointId?.length
+            //         ? turningRestPoints.position.x * scaleCorrection
+            //         : roadEndCoord.x * scaleCorrection + (distToTargrtPoint * Math.cos(turningAngle)),
+            //     turningPointId?.length
+            //         ? turningRestPoints.position.y * scaleCorrection
+            //         : roadEndCoord.y * scaleCorrection + (distToTargrtPoint * Math.sin(turningAngle)),
+            //     turningAngle,
+            //     turningPointId?.length
+            //         ? turningRestPoints.text.replace(" ", "")
+            //         : `${obj.text.replace(" ", "")}前置点`
+            // ));
         }
         else {
             missingPoints.push(`turning point - ${obj.text.replace(" ", "")}`);

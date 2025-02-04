@@ -42,13 +42,48 @@ export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any,
             lineData.line.vertices[1].y
         );
 
-        mooeDoc.mLaneMarks.push(targetPoint(
-            mooeDoc.mLaneMarks.length + firstPointId,
-            pointX,
-            pointY,
-            angle,
-            `${obj.text.replace(" ", "")}`
-        ));
+        const nameParts = obj.text.split("\\");
+
+
+        if (nameParts.length > 1) {
+
+            // const parts = nameParts.filter((_: string[], index: number) => index !== 0);
+
+            // const targetParts = parts.map((str: string) => {
+            //     const targetStr = str.toLocaleLowerCase();
+
+            //     return targetStr.replace("u+", "\\u");
+            // })
+
+            // const name = `${nameParts[0]}${JSON.parse('"' + targetParts.join("") + '"')}`;
+
+            mooeDoc.mLaneMarks.push(targetPoint(
+                mooeDoc.mLaneMarks.length + firstPointId,
+                pointX,
+                pointY,
+                angle,
+                `${nameParts[0]}前置点`
+            ));
+        }
+        else {
+            mooeDoc.mLaneMarks.push(targetPoint(
+                mooeDoc.mLaneMarks.length + firstPointId,
+                pointX,
+                pointY,
+                angle,
+                nameParts[0]
+            ));
+        }
+
+
+
+
+        // const targetStr = obj.text.toLocaleLowerCase().split("u+").join("\\u");
+
+
+        // console.log(nameParts);
+
+
 
     });
 }
