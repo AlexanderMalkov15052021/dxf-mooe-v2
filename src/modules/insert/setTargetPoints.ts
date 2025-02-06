@@ -62,7 +62,7 @@ export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any,
                 pointX,
                 pointY,
                 angle,
-                `${nameParts[0]}前置点`
+                `${nameParts[0].replace("{", "")}前置点`
             ));
         }
         else {
