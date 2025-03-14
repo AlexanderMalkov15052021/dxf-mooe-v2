@@ -70,16 +70,16 @@ export const getDxfIdsData = (docStr: string): DxfIdsData => {
 
     const dividerStr = "fixed id: ";
 
-    if (!docStr.includes(dividerStr)) {
-        return {
-            dxfIdsList: {},
-            dxfIdsBuff: {
-                roadIds: [],
-                laneIds: [],
-                pointIds: []
-            }
-        }
-    }
+    // if (!docStr.includes(dividerStr)) {
+    //     return {
+    //         dxfIdsList: {},
+    //         dxfIdsBuff: {
+    //             roadIds: [],
+    //             laneIds: [],
+    //             pointIds: []
+    //         }
+    //     }
+    // }
 
     const lineBreak = "\n";
     const dividerLength = dividerStr.length;
