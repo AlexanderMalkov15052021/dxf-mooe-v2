@@ -106,46 +106,8 @@ export const setChargePoints = (
             missingPoints.push(`target point - ${obj.text.replace(" ", "")}`);
         }
 
-        // adding turning point
-        if (turningChargePoints) {
-            // const turningLineData = lines.reduce((accum: { dist: number, road: any }, road: any) => {
-
-            //     const dist = getDistToRoad(road, turningChargePoints, origin);
-
-            //     if (dist < accum.dist) {
-            //         accum.dist = dist;
-            //         accum.road = road;
-            //     }
-
-            //     return accum;
-
-            // }, { dist: maxDist, road: null });
-
-
-            // const turningPointId = dxfIdsList[turningChargePoints?.handle ?? 0];
-
-            // const roadEndCoord = getRoadEndCoord(turningLineData);
-
-            // const turningAngle = getRoadAngle(turningLineData);
-
-            // mooeDoc.mLaneMarks.push(targetPoint(
-            //     turningPointId?.length ? Number(turningPointId[0]) : 0,
-            //     turningPointId?.length
-            //         ? turningChargePoints.position.x * scaleCorrection
-            //         : roadEndCoord.x * scaleCorrection + (distToTargrtPoint * Math.cos(turningAngle)),
-            //     turningPointId?.length
-            //         ? turningChargePoints.position.y * scaleCorrection
-            //         : roadEndCoord.y * scaleCorrection + (distToTargrtPoint * Math.sin(turningAngle)),
-            //     turningAngle,
-            //     turningPointId?.length
-            //         ? turningChargePoints.text.replace(" ", "")
-            //         : `${obj.text.replace(" ", "")}前置点`
-            // ));
-
-        }
-        else {
-            missingPoints.push(`turning point - ${obj.text.replace(" ", "")}`);
-        }
+        // adding missing turning point
+        turningChargePoints ?? missingPoints.push(`turning point - ${obj.text.replace(" ", "")}`);
 
     });
 

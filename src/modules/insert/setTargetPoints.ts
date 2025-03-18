@@ -1,11 +1,17 @@
-import { firstPointId, maxDist, scaleCorrection } from "@/constants";
+import { maxDist, scaleCorrection } from "@/constants";
 import { targetPoint } from "@/helpers/elements/targetPoint";
 import { getAtan2, getDistPointToline } from "@/helpers/math";
-import { Coords, MooeDoc } from "@/types";
+import { Coords, dxfIdsBuff, MooeDoc } from "@/types";
 
-export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any, origin: Coords) => {
+export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any, origin: Coords, dxfIdsBuff: dxfIdsBuff) => {
 
-    targetPoints?.map((obj: any) => {
+    const newPoints: number[] = [];
+
+    targetPoints?.map((obj: any, index: number) => {
+
+        const xData = obj?.extendedData?.customStrings[0];
+
+        const xDataPointId: number = xData?.split(" ")?.reverse()[0];
 
         const pointX = (obj.position.x + origin.x) * scaleCorrection;
         const pointY = (obj.position.y + origin.y) * scaleCorrection;
@@ -47,18 +53,10 @@ export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any,
 
         if (nameParts.length > 1) {
 
-            // const parts = nameParts.filter((_: string[], index: number) => index !== 0);
-
-            // const targetParts = parts.map((str: string) => {
-            //     const targetStr = str.toLocaleLowerCase();
-
-            //     return targetStr.replace("u+", "\\u");
-            // })
-
-            // const name = `${nameParts[0]}${JSON.parse('"' + targetParts.join("") + '"')}`;
+            xDataPointId ?? newPoints.push(dxfIdsBuff.pointIds[index]);
 
             mooeDoc.mLaneMarks.push(targetPoint(
-                mooeDoc.mLaneMarks.length + firstPointId,
+                xDataPointId ?? dxfIdsBuff.pointIds[index],
                 pointX,
                 pointY,
                 angle,
@@ -66,8 +64,11 @@ export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any,
             ));
         }
         else {
+
+            xDataPointId ?? newPoints.push(dxfIdsBuff.pointIds[index]);
+
             mooeDoc.mLaneMarks.push(targetPoint(
-                mooeDoc.mLaneMarks.length + firstPointId,
+                xDataPointId ?? dxfIdsBuff.pointIds[index],
                 pointX,
                 pointY,
                 angle,
@@ -75,15 +76,8 @@ export const setTargetPoints = (mooeDoc: MooeDoc, targetPoints: any, lines: any,
             ));
         }
 
-
-
-
-        // const targetStr = obj.text.toLocaleLowerCase().split("u+").join("\\u");
-
-
-        // console.log(nameParts);
-
-
-
     });
+
+    dxfIdsBuff.pointIds = dxfIdsBuff.pointIds.filter(id => !newPoints.includes(id));
+
 }
