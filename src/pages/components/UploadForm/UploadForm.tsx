@@ -5,14 +5,19 @@ import { ChangeEvent, FormEvent } from "react";
 import { emptyMooe } from "@/helpers/emptyMooe/emptyMooe";
 
 import { Modal } from "antd/lib";
+import { laneMark } from "@/types";
+
+import styles from "./UploadForm.module.css"
 
 const UploadForm = observer(() => {
 
     const {
         store: {
             isLoading, dxfFileName, isFarPointsModalOpen, isMissingPointsModalOpen, diapasonPoints, missingPoints,
+            isNameDuplicatesModalOpen, duplicatesNames,
             setIsMessageShow, setIsLoading, setLoadingTime, setDXFFileName, setMooeDoc,
-            setOpenFarPointsModal, setOpenMissingPointsModal, setDXFStr, setRefTime
+            setOpenFarPointsModal, setOpenMissingPointsModal, setDXFStr, setRefTime,
+            setDuplicatePointNamesModalState
         },
     } = ConverterStor;
 
@@ -52,6 +57,14 @@ const UploadForm = observer(() => {
         setLoadingTime([0, 0]);
         setMooeDoc(emptyMooe);
         setRefTime([0, 0]);
+    }
+
+    // При завершении просмотра дублей
+    const duplicateNamesClickHandler = () => {
+        setDuplicatePointNamesModalState(false);
+    }
+    const duplicateNamesCancelHandler = () => {
+        setDuplicatePointNamesModalState(false);
     }
 
     const handleOk = () => {
@@ -96,6 +109,30 @@ const UploadForm = observer(() => {
                     <span>{name}</span>
                 </div>
             )}
+        </Modal>
+
+        {/* 🔻 Модалка дублей имён 🔻 */}
+        <Modal
+            title="Сдублированные названия точек"
+            open={isNameDuplicatesModalOpen}
+            onOk={duplicateNamesClickHandler}
+            onCancel={duplicateNamesCancelHandler}
+        >
+            {duplicatesNames.flatMap((poin: laneMark[]) => {
+                return <div className={styles.duplicatesNamesWrapper}>
+                    {
+                        poin.map((obj: laneMark, index: number) => {
+                            return <div className={styles.duplicatesNamesBlock} key={`${obj.mLaneMarkName}-${index}`}>
+                                <div className={styles.duplicatesNamesTitle}><span>Название: </span><span>{obj.mLaneMarkName}</span></div>
+                                <div  className={styles.duplicatesNamesCoords}>
+                                    <div><span>x: </span><span>{obj.mLaneMarkXYZW.x}</span></div>
+                                    <div><span>y: </span><span>{obj.mLaneMarkXYZW.y}</span></div>
+                                </div>
+                            </div>
+                        })
+                    }
+                </div>
+            })}
         </Modal>
     </>
 });

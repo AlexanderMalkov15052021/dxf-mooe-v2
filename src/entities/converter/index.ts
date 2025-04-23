@@ -1,5 +1,5 @@
 import { emptyMooe } from "@/helpers/emptyMooe/emptyMooe";
-import { FieldType, MooeDoc } from "@/types";
+import { FieldType, laneMark, MooeDoc } from "@/types";
 import { makeAutoObservable } from "mobx";
 
 import Worker from "worker-loader!@/workers/worker.ts";
@@ -43,8 +43,19 @@ class ConverterStor {
         permission: this.permission,
     };
 
+    // Дубли имён
+    duplicatesNames: laneMark[][] = [];
+
+    // Флаг модалки
+    isNameDuplicatesModalOpen = false;
+
     constructor() {
         makeAutoObservable(this);
+    }
+
+    // Установка флага модалки
+    setDuplicatePointNamesModalState = (val: boolean) => {
+        this.isNameDuplicatesModalOpen = val;
     }
 
     setRotAngle = (val: string) => {
@@ -324,6 +335,26 @@ class ConverterStor {
     setIsLoading = (val: boolean) => this.isLoading = val;
 
     setHref = (doc: MooeDoc) => {
+
+        // Получение дубликатов имён
+        const pointList = doc?.mLaneMarks.filter((obj: laneMark) => obj.mLaneMarkName).reduce((accum: any, obj: laneMark) => {
+
+            if (accum.points[obj.mLaneMarkName]) {
+                accum.points[obj.mLaneMarkName].push(obj);
+            }
+            else {
+                accum.points[obj.mLaneMarkName] = [obj];
+            }
+
+            return accum;
+        }, { points: {} });
+
+        const dublicates = (Object.values(pointList.points) as laneMark[][]).filter((arr: laneMark[]) => arr.length > 1);
+
+        this.duplicatesNames = dublicates;
+
+        dublicates.length && (this.isNameDuplicatesModalOpen = true);
+
         const newDock = JSON.stringify(doc);
 
         const file = new Blob([newDock as unknown as string], { type: 'application/mooe' });
