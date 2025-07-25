@@ -1,11 +1,12 @@
 export const prePoint = (
     lastId: number, pointX: number, pointY: number, angle: number, zoneName: string
 ) => {
+
     return {
         "mIsJockeyEndpoint": false,
         "mLaneMarkDescript": "",
         "mLaneMarkEnName": `${zoneName}`,  // A603col01row21
-        "mLaneMarkID": lastId,
+        "mLaneMarkID": Number(lastId) ?? lastId,
         "mLaneMarkName": `${zoneName}`,  // A603col01row21
         "mLaneMarkSize": {
             "height": 0,

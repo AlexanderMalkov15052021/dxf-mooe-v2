@@ -10,6 +10,7 @@ import { DXFDataType, DxfIdsData, MooeDoc } from "@/types";
 import { setTargetPoints } from "../insert/setTargetPoints";
 import { setNewIds } from "../insert/setNewIds";
 import { setPalletPoints } from "../insert/setPalletPoints";
+import { setPrePoints } from "../insert/setPrePoints";
 
 export const getMooe = (dxf: IDxf, dxfIdsData: DxfIdsData, mooeDoc: MooeDoc, permission: string, inaccuracy: string) => {
     const dxfIdsList = dxfIdsData.dxfIdsList;
@@ -53,6 +54,15 @@ export const getMooe = (dxf: IDxf, dxfIdsData: DxfIdsData, mooeDoc: MooeDoc, per
     DXFData.targetPoints && setTargetPoints(
         mooeDoc,
         DXFData.targetPoints,
+        lines,
+        DXFData.origin,
+        dxfIdsBuff
+    );
+
+    // Установка пре-поинтов
+    DXFData.prePoints && setPrePoints(
+        mooeDoc,
+        DXFData.prePoints,
         lines,
         DXFData.origin,
         dxfIdsBuff
