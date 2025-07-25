@@ -28,6 +28,8 @@ type DXFData = {
     cachePalletPoints: any;
 
     otheTargetPoints: any;
+
+    prePoints: any;
 };
 
 export const getDXFData = (dxf: IDxf) => {
@@ -67,6 +69,8 @@ export const getDXFData = (dxf: IDxf) => {
 
         obj.layer === "Othe target points" && accum.otheTargetPoints.push(obj);
 
+        obj.layer === "Pre points" && accum.prePoints.push(obj);
+
         return accum;
     }, {
         quadraticSpline: [],
@@ -94,6 +98,8 @@ export const getDXFData = (dxf: IDxf) => {
         cachePalletPoints: [],
 
         otheTargetPoints: [],
+
+        prePoints: [],
 
         layer: null
     });
